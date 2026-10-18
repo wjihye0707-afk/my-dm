@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>동민 · 메시지</title>
+<style>
+:root{--blue:#087eff;--bg:#f5f5f7;--ink:#111}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",Arial,sans-serif;background:#202124;color:var(--ink);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:12px}
+.phone{width:min(100%,430px);height:min(900px,94dvh);min-height:580px;border:8px solid #111;border-radius:42px;overflow:hidden;background:var(--bg);position:relative;box-shadow:0 12px 50px #0008;display:flex;flex-direction:column}
+.status{height:35px;flex:none;padding:8px 24px 0;display:flex;justify-content:space-between;font-size:13px;font-weight:700;background:#f5f5f7e8;z-index:2}
+header{padding:9px 16px 12px;background:#f5f5f7e8;backdrop-filter:blur(18px);display:flex;align-items:center;gap:12px;border-bottom:1px solid #ddd8;z-index:2}
+.back{font-size:26px;color:var(--blue);border:0;background:none;padding:0 4px}
+.avatar{width:38px;height:38px;border-radius:50%;background:#d5e7f7;display:grid;place-items:center;font-size:18px;overflow:hidden;flex:none}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.headtxt{flex:1;text-align:center;margin-right:26px}
+.headtxt strong{display:block;font-size:16px}
+.headtxt small{color:#777;font-size:11px}
+#settingsBtn{border:0;background:none;font-size:21px;color:var(--blue);padding:4px}
+#chat{flex:1;overflow:auto;padding:18px 13px 14px;background-size:cover;background-position:center;display:flex;flex-direction:column;gap:8px}
+.date{text-align:center;font-size:11px;color:#666;margin:4px 0 12px;text-shadow:0 1px 3px #fff}
+.bubble{max-width:82%;padding:10px 13px;border-radius:19px;font-size:16px;line-height:1.35;white-space:pre-wrap;overflow-wrap:anywhere;box-shadow:0 1px 1px #0001}
+.incoming{align-self:flex-start;background:#e5e5ea;color:#111;border-bottom-left-radius:6px}
+.outgoing{align-self:flex-end;background:var(--blue);color:white;border-bottom-right-radius:6px}
+.time{font-size:10px;color:#777;margin:0 5px}
+.row-in,.row-out{display:flex;flex-direction:column;max-width:100%}
+.row-in{align-items:flex-start}.row-out{align-items:flex-end}
+.composer{padding:10px 10px max(10px,env(safe-area-inset-bottom));background:#f5f5f7ee;display:flex;gap:8px;align-items:center;border-top:1px solid #ddd8}
+.plus{border:0;border-radius:50%;width:31px;height:31px;font-size:23px;color:#666;background:#e1e1e6;flex:none}
+#message{min-width:0;flex:1;border:1px solid #c9c9ce;border-radius:20px;padding:10px 13px;font-size:16px;outline:none;background:#fff}
+#send{border:0;background:var(--blue);color:#fff;border-radius:18px;padding:9px 13px;font-weight:700}
+.panel{position:absolute;inset:0;background:#f7f7fa;z-index:5;display:none;flex-direction:column;overflow:auto;padding:18px}
+.panel.show{display:flex}
+.paneltop{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.paneltop h2{margin:0;font-size:21px}
+.close{border:0;background:#e5e5ea;border-radius:50%;width:32px;height:32px;font-size:19px}
+label{display:block;font-weight:700;font-size:13px;margin:14px 0 7px}
+input[type=text],textarea{width:100%;border:1px solid #d0d0d5;border-radius:12px;padding:11px;font:inherit;background:white}
+textarea{min-height:70px;resize:vertical}
+input[type=file]{width:100%;font-size:13px}
+.btn{border:0;border-radius:12px;padding:12px 14px;background:var(--blue);color:white;font-size:15px;font-weight:700;margin-top:10px}
+.btn.secondary{background:#e5e5ea;color:#222}
+.btn.danger{background:#ffebe9;color:#b42318}
+.hint{font-size:12px;color:#777;line-height:1.5;margin:7px 0}
+hr{border:0;border-top:1px solid #ddd;width:100%;margin:18px 0}
+@media(min-width:600px){body{padding:20px}.phone{height:90dvh}}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status"><span id="statusTime">9:41</span><span>●●●  ◉  ▰</span></div>
+  <header>
+    <button class="back" aria-label="뒤로">‹</button>
+    <div class="avatar" id="avatar">💬</div>
+    <div class="headtxt"><strong id="headerName">동민</strong><small>메시지</small></div>
+    <button id="settingsBtn" aria-label="설정">•••</button>
+  </header>
+  <main id="chat">
+    <div class="date" id="dateLabel">iMessage</div>
+  </main>
+  <form class="composer" id="sendForm">
+    <button type="button" class="plus" id="quickIncoming" title="상대방 메시지 추가">＋</button>
+    <input id="message" type="text" placeholder="iMessage" autocomplete="off" aria-label="메시지 입력">
+    <button id="send" type="submit">↑</button>
+  </form>
+  <section class="panel" id="settingsPanel">
+    <div class="paneltop"><h2>대화 설정</h2><button class="close" id="closeSettings">×</button></div>
+    <label for="nameInput">상대방 이름</label>
+    <input id="nameInput" type="text" value="동민" maxlength="30">
+    <label for="avatarFile">상대방 프로필 사진 (선택)</label>
+    <input id="avatarFile" type="file" accept="image/*">
+    <label for="wallpaperFile">채팅 배경 사진</label>
+    <input id="wallpaperFile" type="file" accept="image/*">
+    <p class="hint">사진은 이 브라우저 안에 저장돼. 사진 크기가 크면 저장되지 않을 수 있어.</p>
+    <hr>
+    <label for="incomingText">상대방 메시지 만들기</label>
+    <textarea id="incomingText" placeholder="예: 지금 뭐 해?"></textarea>
+    <button class="btn" id="addIncoming" type="button">동민 메시지 추가</button>
+    <label for="outgoingText">내 메시지 만들기</label>
+    <textarea id="outgoingText" placeholder="예: 그냥 너 생각 중 ㅎㅎ"></textarea>
+    <button class="btn" id="addOutgoing" type="button">내 메시지 추가</button>
+    <hr>
+    <button class="btn secondary" id="exportChat" type="button">대화 백업 파일 저장</button>
+    <button class="btn danger" id="clearChat" type="button">대화 내용 초기화</button>
+    <p class="hint">가상 대화 시뮬레이터야. 실제 문자나 iMessage가 전송되지는 않아.</p>
+  </section>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const KEY = "dm-simulator-dongmin-v1";
+let state = {name:"동민",avatar:"",wallpaper:"",messages:[]};
+function load(){
+  try{const saved=JSON.parse(localStorage.getItem(KEY)||"null");if(saved)state={...state,...saved};}catch(e){}
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){alert("저장 공간이 부족해. 사진을 더 작은 크기로 골라 줘.");}}
+function nowTime(){return new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",hour12:false});}
+function render(){
+  $("headerName").textContent=state.name||"동민";
+  $("nameInput").value=state.name||"동민";
+  $("avatar").innerHTML=state.avatar?'<img alt="프로필" src="'+state.avatar+'">':"💬";
+  $("chat").style.backgroundImage=state.wallpaper?'linear-gradient(#ffffff24,#ffffff24),url("'+state.wallpaper+'")':"";
+  $("chat").style.backgroundColor=state.wallpaper?"transparent":"#f5f5f7";
+  $("chat").innerHTML='<div class="date" id="dateLabel">iMessage</div>';
+  state.messages.forEach(m=>{
+    const row=document.createElement("div");row.className=m.from==="me"?"row-out":"row-in";
+    const bubble=document.createElement("div");bubble.className="bubble "+(m.from==="me"?"outgoing":"incoming");bubble.textContent=m.text;
+    const time=document.createElement("div");time.className="time";time.textContent=m.time||"";
+    row.append(bubble,time);$("chat").appendChild(row);
+  });
+  $("chat").scrollTop=$("chat").scrollHeight;
+}
+function addMessage(from,text){
+  text=(text||"").trim();if(!text)return;
+  state.messages.push({from,text,time:nowTime()});save();render();
+}
+$("sendForm").addEventListener("submit",e=>{e.preventDefault();addMessage("me",$("message").value);$("message").value="";});
+$("settingsBtn").onclick=()=>$("settingsPanel").classList.add("show");
+$("closeSettings").onclick=()=>$("settingsPanel").classList.remove("show");
+$("nameInput").addEventListener("change",()=>{state.name=$("nameInput").value.trim()||"동민";save();render();});
+$("addIncoming").onclick=()=>{addMessage("them",$("incomingText").value);$("incomingText").value="";};
+$("addOutgoing").onclick=()=>{addMessage("me",$("outgoingText").value);$("outgoingText").value="";};
+$("quickIncoming").onclick=()=>{$("settingsPanel").classList.add("show");$("incomingText").focus();};
+function readImage(file,callback){
+ if(!file)return;
+ const reader=new FileReader();reader.onload=()=>{callback(reader.result);save();render();};reader.readAsDataURL(file);
+}
+$("wallpaperFile").addEventListener("change",e=>readImage(e.target.files[0],data=>state.wallpaper=data));
+$("avatarFile").addEventListener("change",e=>readImage(e.target.files[0],data=>state.avatar=data));
+$("clearChat").onclick=()=>{if(confirm("대화 내용을 모두 지울까?")){state.messages=[];save();render();}};
+$("exportChat").onclick=()=>{
+ const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+ const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="my-dm-backup.json";a.click();URL.revokeObjectURL(url);
+};
+load();render();
+</script>
+</body>
+</html>
